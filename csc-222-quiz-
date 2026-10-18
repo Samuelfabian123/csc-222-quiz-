@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNN Computer Based Test - CSC 222</title>
+<style>
+:root{--g:#0b6b3a;--g2:#e6f4ec;--gold:#ffffff;--ink:#14201a;--mut:#5b6b62;--line:#d2e2d8;--red:#b3261e;--bg:#f4f8f5;--amber:#b26a00}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:var(--g);border-bottom:4px solid var(--gold);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
+header h1{font-size:16px;margin:0;font-weight:700}
+header small{opacity:.85;display:block;font-weight:400;font-size:12px}
+#timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:8px}
+#timer.low{background:var(--red);animation:p 1s infinite}
+@keyframes p{50%{opacity:.6}}
+main{max-width:860px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:20px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text]{width:100%;padding:12px;border:1px solid #b9c8bf;border-radius:8px;font-size:16px}
+input:focus{outline:2px solid var(--g);border-color:var(--g)}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--g);background:#fff;color:var(--g);padding:10px 16px;font-weight:600}
+button.primary{background:var(--g);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.big{width:100%;padding:14px;font-size:17px;margin-top:18px}
+ul.rules{padding-left:20px;color:var(--mut);margin:8px 0 0}
+.err{color:var(--red);margin-top:10px;font-weight:600}
+.qno{color:var(--mut);font-size:14px;margin-bottom:4px}
+.qtext{font-size:18px;font-weight:600;margin-bottom:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:12px;margin-bottom:10px;font-weight:500}
+.opt:hover{border-color:var(--g)}
+.opt.sel{border-color:var(--g);background:var(--g2)}
+.opt b{min-width:22px;color:var(--g)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-top:8px}
+.grid button{padding:8px 0;font-size:14px;border-color:var(--line);color:var(--ink)}
+.grid button.ans{background:var(--g2);border-color:var(--g)}
+.grid button.cur{outline:2px solid var(--ink)}
+.grid button.flag{background:#fff3d6;border-color:var(--amber)}
+.score{text-align:center}
+.score .n{font-size:56px;font-weight:800;color:var(--g);line-height:1}
+.score .n.fail{color:var(--red)}
+.pill{display:inline-block;padding:4px 12px;border-radius:99px;font-weight:700;font-size:14px;background:var(--g2);color:var(--g)}
+.pill.fail{background:#fde8e6;color:var(--red)}
+.rev{border-left:4px solid var(--red);padding:10px 14px;margin:12px 0;background:#fffafa;border-radius:6px}
+.rev .y{color:var(--red)} .rev .c{color:var(--g);font-weight:600}
+.legend{font-size:13px;color:var(--mut);display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal .card{max-width:420px;margin:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>UNIVERSITY OF NIGERIA, NSUKKA<small id="who">Computer Based Test (CBT) | CSC 222: Principles of Crop Production</small></h1>
+  <div id="timer" class="hidden">25:00</div>
+</header>
+<main>
+ 
+<section id="login" class="card">
+  <div style="text-align:center;margin-bottom:10px"><div style="font-weight:800;font-size:18px;color:var(--g)">UNIVERSITY OF NIGERIA, NSUKKA</div><div style="font-size:13px;color:var(--mut)">Computer Based Test (Practice) &bull; CSC 222 / ANS 274</div></div><h2>Candidate Login</h2>
+  <ul class="rules">
+    <li>70 questions, randomly picked for each student</li>
+    <li>Time allowed: 25 minutes. The exam submits itself when time is up</li>
+    <li>Do not refresh to cheat the clock: the timer keeps running</li>
+  </ul>
+  <label for="name">Full name</label>
+  <input id="name" type="text" autocomplete="name" placeholder="e.g. Anyim Samuel Fabian">
+  <label for="reg">Registration number</label>
+  <input id="reg" type="text" autocomplete="off" placeholder="e.g. 2021/242123">
+  <div id="lerr" class="err"></div>
+  <button id="start" class="primary big">Login and Start Exam</button>
+</section>
+ 
+<section id="exam" class="hidden">
+  <div class="card">
+    <div class="qno" id="qno"></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="opts"></div>
+    <div class="nav">
+      <button id="prev">&larr; Previous</button>
+      <button id="flag">Flag</button>
+      <button id="next" class="primary">Next &rarr;</button>
+    </div>
+  </div>
+  <div class="card">
+    <strong>Question navigator</strong> <span id="prog" style="color:var(--mut)"></span>
+    <div class="grid" id="grid"></div>
+    <div class="legend"><span>Green = answered</span><span>Yellow = flagged</span><span>White = not answered</span></div>
+    <button id="submit" class="primary big">Submit Exam</button>
+  </div>
+</section>
+ 
+<section id="result" class="hidden">
+  <div class="card score">
+    <div id="rname" style="font-weight:700"></div>
+    <div id="rreg" style="color:var(--mut);margin-bottom:12px"></div>
+    <div class="n" id="rscore"></div>
+    <div id="rpct" style="margin:8px 0"></div>
+    <span class="pill" id="rpill"></span>
+    <div id="rmeta" style="color:var(--mut);margin-top:10px;font-size:14px"></div>
+  </div>
+  <div class="card">
+    <h2>Questions you missed</h2>
+    <div id="review"></div>
+  </div>
+  <button id="logout" class="big">Exit (next student)</button>
+</section>
+ 
+</main>
+ 
+<div id="confirm" class="modal hidden"><div class="card">
+  <h2>Submit exam?</h2>
+  <p id="cmsg"></p>
+  <div class="nav"><button id="cno">Go back</button><button id="cyes" class="primary">Yes, submit</button></div>
+</div></div>
+ 
+<script>
+// HOW TO ADD QUESTIONS: add a line  Q("Question?", "CORRECT answer", "wrong 1", "wrong 2", "wrong 3"),
+// The correct answer is ALWAYS written first. The app shuffles the options automatically.
+// Each student gets 70 random questions from this bank. Keep adding more for variety.
+const Q = (q, c, w1, w2, w3) => ({ q, o: [c, w1, w2, w3], a: 0 });
+const QUESTIONS = [
+// ---------- INTRODUCTION / CLASSIFICATION
+Q("A crop that completes its life cycle within one season or one year is called","Annual crop","Biennial crop","Perennial crop","Ratoon crop"),
+Q("Crops that need two or more years in the field before maturity and live for many years are","Perennial crops","Annual crops","Day-neutral crops","Short-day crops"),
+Q("Which of these is NOT a basis for classifying crops?","Soil colour","Growth pattern","Plant part (botanical)","End use (economic)"),
+Q("Soyabean flowers when the days are short. It is therefore a","Short-day crop","Long-day crop","Day-neutral crop","Biennial crop"),
+Q("Peas flower over a wide range of day length. They are","Day-neutral plants","Short-day plants","Long-day plants","Perennial plants"),
+Q("Mucuna, Centrosema and Calopogonium are used mainly as","Green manure crops","Fibre crops","Beverage crops","Oil crops"),
+Q("Ogbono (bush mango) has the botanical name","Irvingia gabonensis","Dacryodes edulis","Treculia africana","Parkia clappertoniana"),
+Q("African pear (ube) is","Dacryodes edulis","Irvingia gabonensis","Pentaclethra macrophylla","Gongronema latifolium"),
+Q("Ukwa (African breadfruit) is","Treculia africana","Dennettia tripetala","Dialium guineense","Pterocarpus soyauxii"),
+Q("Ugba is obtained from","Pentaclethra macrophylla","Irvingia gabonensis","Parkia clappertoniana","Chrysophyllum albidum"),
+Q("Which of these crops is harvested from naturally established plants?","Bush mango (ogbono)","Maize","Rice","Wheat"),
+Q("Which pair is correctly matched?","Cotton - fibre crop","Cocoa - fibre crop","Maize - latex crop","Rubber - sugar crop"),
+Q("Crops grown mainly to feed livestock are called","Forage crops","Drug crops","Beverage crops","Latex crops"),
+Q("Cocoa and coffee belong to the group of","Beverage crops","Fibre crops","Sugar crops","Forage crops"),
+// ---------- ENVIRONMENT
+Q("Environmental factors affecting crop production are grouped into","Climatic, edaphic and biotic","Climatic, chemical and social","Physical, political and moral","Edaphic, genetic and economic"),
+Q("A Q10 of 2 means that","The reaction rate doubles for every 10°C rise","The reaction rate halves for every 10°C rise","The reaction stops at 20°C","Temperature doubles every 10 minutes"),
+Q("The three cardinal temperatures are","Minimum, optimum and maximum","Low, high and average","Day, night and mean","Freezing, boiling and room"),
+Q("The temperature at which a crop functions best is the","Optimum temperature","Minimum temperature","Maximum temperature","Base temperature"),
+Q("Induction of flowering by exposure to low temperature is called","Vernalization","Stratification","Tuberization","Photoperiodism"),
+Q("Induction of tuber formation by low temperature is called","Tuberization","Vernalization","Stratification","Dormancy"),
+Q("Breaking seed dormancy at the desired temperature range is known as","Stratification","Vernalization","Tuberization","Thermoperiodicity"),
+Q("Potato forms tubers best at a temperature of about","15–18°C","25–30°C","35–40°C","5°C"),
+Q("The difference between night and day temperatures is called","Thermoperiodicity","Photoperiodism","Vernalization","Dormancy"),
+Q("Barley, wheat and oats can be grown in northern Nigeria mainly during the","Harmattan","Rainy season","Late rains","Dry hot season"),
+Q("Under water stress the stomata","Close, reducing CO2 exchange and photosynthesis","Open wider","Produce more chlorophyll","Stop respiration"),
+Q("Which of the following is NOT an importance of water to the plant?","Source of carbon dioxide","Dissolves nutrients in the soil","Transport medium in the plant","Gives rigidity to cells"),
+Q("A slow soaking rain is best for crops because","A high proportion infiltrates into the soil","It causes more runoff","It increases leaching","It reduces humidity"),
+Q("The intensity of rainfall refers to","How heavily the rain falls","The number of rainy days","The length of the rainy season","The total yearly rainfall"),
+Q("A crop that is almost a hydrophyte and needs plenty of water is","Rice","Sorghum","Millet","Cowpea"),
+Q("A crop needing relatively little water is","Sorghum (guinea corn)","Rice","Sugarcane","Banana"),
+Q("High relative humidity favours","Pest and disease build-up","Faster evaporation","Drought","Seed dormancy"),
+Q("Humidity is usually higher","At night than in the day","In the day than at night","At noon","In the dry season only"),
+Q("The Photosynthetically Active Radiation (PAR) range is","400–700 nm","100–200 nm","800–1000 nm","1200–1500 nm"),
+Q("The developmental response of plants to relative lengths of light and darkness is","Photoperiodism","Thermoperiodicity","Vernalization","Etiolation"),
+Q("Plants with erect leaves (erectophile) are","More efficient in intercepting light","Less efficient in intercepting light","Unable to photosynthesize","Only found in cereals"),
+Q("Low light intensity promotes stem extension leading to","Etiolation","Tillering","Vernalization","Greater leaf thickness"),
+Q("Higher yields of crops in northern Nigeria than in the southern humid part are partly due to","Higher incident solar radiation","More rainfall","Heavier clay soils","More cloud cover"),
+Q("Which of these is a harmful effect of wind on crops?","Lodging and soil erosion","Nitrogen fixation","Increased humidity","Pollination of all crops"),
+Q("Oxygen deficiency in waterlogged soils results in","Root death","Faster growth","More nodulation","Increased photosynthesis"),
+Q("Which gas is a major air pollutant that reduces photosynthesis in cereals?","Sulphur dioxide","Oxygen","Carbon dioxide","Nitrogen"),
+Q("Edaphic factors refer to","Soil factors","Climatic factors","Living organisms","Social factors"),
+Q("The ability of a soil to resist large pH changes is its","Buffering capacity","Cation exchange capacity","Soil structure","Texture"),
+Q("Soil structure refers to","The arrangement, size and stability of soil aggregates","The proportion of sand, silt and clay","The colour of soil","The amount of organic matter"),
+Q("A well-textured soil with low CEC will","Remain fairly unproductive because applied nutrients are lost","Be highly productive","Hold nutrients strongly","Have high buffering capacity"),
+Q("The ladybird beetle is beneficial because it","Preys on aphids","Pollinates melon","Fixes nitrogen","Causes diseases"),
+Q("Which organism is necessary for pollination of melon?","Bee","Aphid","Nematode","Mistletoe"),
+Q("Rhizobium bacteria are found in the","Root nodules of legumes","Leaves of cereals","Stems of cassava","Seeds of maize"),
+Q("Mistletoe is an example of a","Parasitic plant","Beneficial insect","Pollinator","Legume"),
+// ---------- SOIL FERTILITY
+Q("A soil is fertile if it","Adequately supplies the nutrients needed for normal plant growth","Has dark colour","Is always wet","Has many stones"),
+Q("Soil fertility is better described in terms of nutrient","Availability than content","Content than availability","Colour","Weight"),
+Q("Soil productivity is the result of","Fertility, management, water and climate","Fertility only","Rainfall only","Colour and texture"),
+Q("Two major ways of determining the nutrient status of a soil are","Soil analysis and plant analysis","Weighing and counting","Ploughing and harrowing","Irrigation and drainage"),
+Q("Which of these is a macronutrient?","Nitrogen","Zinc","Boron","Copper"),
+Q("Which of these is a micronutrient?","Zinc","Potassium","Calcium","Sulphur"),
+Q("The elements carbon, hydrogen and oxygen are obtained mainly from","Air and water","Soil minerals","Fertilizers","Rocks"),
+Q("Plant nutrients obtained from soil minerals are called","Mineral nutrients","Organic nutrients","Gaseous nutrients","Trace gases"),
+Q("An element is essential if","Its absence drastically reduces growth and the plant cannot complete its life cycle","It is present in the plant","It is found in the soil","It is heavy"),
+Q("Yellowing (chlorosis) starting from the midrib of the oldest leaves indicates deficiency of","Nitrogen","Iron","Calcium","Boron"),
+Q("Abnormally dark green or crimson leaves, starting in the oldest leaves, indicate deficiency of","Phosphorus","Nitrogen","Potassium","Magnesium"),
+Q("Drying and bronzing of leaf margins with leaf curling indicates deficiency of","Potassium","Phosphorus","Zinc","Sulphur"),
+Q("Yellowing of the youngest leaves while old leaves remain green is typical of deficiency of","Sulphur","Nitrogen","Phosphorus","Potassium"),
+Q("Failure of the terminal bud to develop and distorted young leaves indicate deficiency of","Calcium","Nitrogen","Phosphorus","Chlorine"),
+Q("Yellowing from leaf tip toward the veins, with veins remaining green, indicates deficiency of","Magnesium","Nitrogen","Calcium","Copper"),
+Q("Death of terminal buds, rosette formation and brown-spot disease in cabbage family are signs of","Boron deficiency","Iron deficiency","Nitrogen deficiency","Zinc deficiency"),
+Q("Khaira disease of rice is caused by deficiency of","Zinc","Iron","Boron","Molybdenum"),
+Q("Whiptail disease of cauliflower is associated with deficiency of","Molybdenum","Zinc","Copper","Manganese"),
+Q("Interveinal chlorosis of young leaves, mainly in rice nurseries and sorghum, indicates deficiency of","Iron","Potassium","Nitrogen","Magnesium"),
+Q("Molybdenum is particularly important in legumes because it is part of","Nitrogenase and nitrate reductase","Chlorophyll","Auxin","Cell walls"),
+Q("Zinc is a component of the plant hormone","Auxin","Gibberellin","Ethylene","Cytokinin"),
+Q("Loss of green pigment in a leaf is called","Chlorosis","Necrosis","Morphology","Hypertrophy"),
+Q("Death of leaf tissue is called","Necrosis","Chlorosis","Etiolation","Vernalization"),
+Q("Loss of soil fertility through removal of nutrients by harvested crops is called","Crop removal","Fixation","Mineralization","Immobilization"),
+Q("Which of these reduces soil fertility?","Erosion and leaching","Green manuring","Application of compost","Crop rotation with legumes"),
+Q("Flowering plants do not grow in soil containing more than about ___ of NaCl and other salts","6%","1%","0.1%","0.01%"),
+Q("Soil fertility that is derived from the soil itself is","Permanent fertility","Temporary fertility","Artificial fertility","Residual fertility"),
+Q("Plant and animal residues that release nutrients by mineralization are","Organic manures","Inorganic fertilizers","Pesticides","Herbicides"),
+Q("Manure from animal houses made of faeces, urine and bedding is","Farmyard manure","Green manure","Compost","Sewage sludge"),
+Q("Growing and ploughing in green crops to release nutrients is","Green manuring","Composting","Mulching","Fallowing"),
+Q("Legumes are preferred for green manuring because they","Fix atmospheric nitrogen","Have no roots","Grow slowly","Contain no water"),
+Q("Fresh poultry manure should be applied about a week before planting to","Allow heat from decomposition to dissipate and avoid scorching","Increase weeds","Reduce nitrogen","Kill all pests"),
+Q("Excess application of fresh poultry manure may cause toxicity because of high","Copper and zinc","Calcium and iron","Chlorine and water","Potassium and sulphur"),
+Q("Which is an advantage of organic manure?","Improves soil structure and water-holding capacity","Releases nutrients very rapidly","Has very predictable nutrient content","Never carries pathogens"),
+Q("Which is a disadvantage of organic manure?","Nutrient release is slow","It improves soil structure","It is cheap","It supplies many nutrients"),
+Q("In fresh organic matter the C/N ratio is","High","Low","Zero","Equal to one"),
+Q("The conversion of organic nutrients into mineral forms by microbes is","Mineralization","Immobilization","Leaching","Volatilization"),
+Q("A material that contains one or more fertilizer elements is a","Carrier","Filler","Binder","Diluent"),
+Q("Inert materials added to make up the weight of a compound fertilizer are","Fillers","Carriers","Active ingredients","Straights"),
+Q("A fertilizer supplying only one primary nutrient is a","Straight fertilizer","Compound fertilizer","Complete fertilizer","Mixed fertilizer"),
+Q("Which is a straight nitrogen fertilizer?","Urea","NPK 15:15:15","Ammonium phosphate","Potassium nitrate"),
+Q("NPK 15:15:15 is an example of a","Compound (mixed) fertilizer","Straight fertilizer","Organic manure","Filler"),
+Q("The fertilizer analysis of NPK 15:15:15 is","45%","15%","30%","60%"),
+Q("A fertilizer with analysis above 30% is graded as","Concentrated","Low analysis","Medium analysis","High analysis"),
+Q("A fertilizer with analysis below 15% is graded as","Low analysis","Medium analysis","High analysis","Concentrated"),
+Q("Urea contains about ___ nitrogen","40–46%","10–15%","20–21% only","5%"),
+Q("Ammonium sulphate contains about ___ nitrogen","20–21%","46%","33%","5%"),
+Q("The primary nutrients supplied by a fertilizer as active ingredients are","N, P2O5 and K2O","Ca, Mg and S","Fe, Zn and Cu","C, H and O"),
+Q("Phosphorus has been called the master key to agriculture because","Low yields are more often due to lack of phosphate than any element except nitrogen","It is the only nutrient plants need","It is required in the largest amounts","It is never lost from soils"),
+Q("Phosphate fertilizers are NOT suitable for","Alkaline soils","Acid soils","Sandy soils","Clay soils"),
+Q("Muriate of potash is chemically","Potassium chloride","Potassium sulphate","Potassium nitrate","Potassium carbonate"),
+Q("Basic slag is a by-product of","Steel manufacture","Oil refining","Sugar processing","Bone processing"),
+Q("Methods of fertilizer application include","Band, ring, broadcasting and fertigation","Only broadcasting","Only spraying","Burning and flooding"),
+Q("The quantity of fertilizer applied per unit area is the fertilizer","Rate","Grade","Analysis","Carrier"),
+Q("Acid soils usually need more potassium fertilizer because high rainfall","Leaches potassium","Adds potassium","Fixes potassium","Has no effect on potassium"),
+Q("Boron is usually supplied as","Borax","Urea","Gypsum","Kainite"),
+Q("Molybdenum is usually supplied as","Sodium molybdate","Borax","Zinc sulphate","Muriate of potash"),
+// ---------- WATER, IRRIGATION, DRAINAGE
+Q("Irrigation is best defined as","Artificial application of water to soil for plant growth","Removal of excess water from soil","Natural rainfall","Storing rainwater"),
+Q("Drainage is the","Artificial removal of excess water from a cropped field","Application of water to crops","Mulching of soil","Ploughing of land"),
+Q("Collecting rainwater from roofs for later use is","Rainwater harvesting","Desalination","Contour farming","Drip irrigation"),
+Q("Application of organic or inorganic material on the soil surface to reduce evaporation is","Mulching","Fallowing","Ploughing","Harrowing"),
+Q("Conservation tillage leaves at least ___ of crop residue on the soil surface","30%","5%","10%","100%"),
+Q("A tippy tap is used for","Saving water during hand washing","Irrigating crops","Draining fields","Desalinating water"),
+Q("Which irrigation method gives the best results with minimal water loss but is expensive?","Drip irrigation","Wild flooding","Furrow irrigation","Basin flooding"),
+Q("The most common form of irrigation around the globe is","Surface irrigation","Sprinkler irrigation","Drip irrigation","Sub-irrigation by pumps"),
+Q("The most primitive and least controlled surface irrigation method is","Wild flooding","Border irrigation","Furrow irrigation","Basin irrigation"),
+Q("Furrow irrigation is ideal for","Row crops such as potato, cotton and sugarcane","Rice paddies only","Orchards only","Pasture only"),
+Q("Check basin irrigation is mainly used for","Orchards","Rice","Maize","Vegetables only"),
+Q("In sprinkler irrigation water is applied","Like natural rain","By gravity down furrows","Drop by drop at the roots","Under the soil"),
+Q("Drip emitters release water at about","2–11 litres per hour","50–100 litres per hour","1000 litres per hour","0.01 litres per hour"),
+Q("The major disadvantage of sprinkler irrigation is","High initial cost and high operating pressure","No control over application","Inability to irrigate sloping land","Complete water wastage"),
+Q("Irrigation without drainage can lead to","Waterlogging and salinity","Better aeration","Higher organic matter","Less weed growth"),
+Q("Consumptive use of water by a crop is the sum of","Transpiration and evaporation","Rainfall and runoff","Infiltration and drainage","Irrigation and leaching"),
+Q("Water requirement is expressed as","WR = IR + EP + S","WR = IR − EP − S","WR = IR × EP","WR = EP ÷ S"),
+Q("Irrigation requirement (IR) is","WR − (EP + S)","WR + EP + S","EP − WR","S − WR"),
+Q("Gross irrigation requirement is","Net irrigation requirement divided by irrigation efficiency","Net irrigation requirement multiplied by rainfall","Rainfall minus evaporation","Water requirement plus rainfall"),
+Q("Irrigation frequency refers to","The number of days between successive irrigations","The volume of water applied","The depth of the water table","The size of the farm"),
+Q("Irrigation scheduling means","Supplying the right amount of water at the right time","Draining the field","Preparing the nursery","Selling irrigated crops"),
+Q("Wild flooding has the disadvantage of","Excessive runoff and deep percolation losses","High cost of installation","Need for high technical skill","Interference with implements"),
+Q("High sodium in irrigation water causes","Deflocculation and reduced permeability of soil","Better infiltration","Increased calcium uptake","Higher organic matter"),
+Q("Highly saline water is","Not suitable for irrigation under normal conditions","Suitable for all crops","Best for heavy soils","Good for sensitive crops"),
+Q("Poor drainage can be caused by","Intensive rainfall, high water table and blocked drainage channels","Good land slope","Sandy soils only","Mulching"),
+Q("A major effect of poor drainage is","Poor aeration inhibiting root respiration","Increased air in soil","More root penetration","Lower water table"),
+Q("Surface drainage removes","Free water accumulating on the soil surface","Water deep in the subsoil only","Water from leaves","Only salts"),
+Q("Sub-surface drainage works mainly by","Lowering the water table","Shaping land surface","Flooding the field","Building bunds"),
+Q("Drains in a herringbone system","Join the main from each side","Are surface ditches","Have no laterals","Are only for sloping land"),
+Q("Mole drains are best regarded as a","Temporary and low-cost drainage method","Permanent expensive method","Surface drainage method","Irrigation method"),
+Q("Cross-slope ditches that intercept runoff form the","Interception system","Random system","Bedding system","Gridiron system"),
+// ---------- CROPPING SYSTEMS
+Q("A cropping system is","The type and sequence of crops grown and practices used","A single crop planted once","A method of storing grain","A weed control method"),
+Q("Growing a single crop on the same land year after year is","Monocropping","Crop rotation","Intercropping","Relay cropping"),
+Q("A disadvantage of monocropping is","It encourages build-up of pests and diseases","It improves soil structure","It prevents erosion","It adds nitrogen"),
+Q("Systematic planting of different crops in a particular order on the same land over several years is","Crop rotation","Monocropping","Intercropping","Mutualism"),
+Q("Crop rotation was practised early by farmers in the","Middle East","Americas","Australia","Antarctica"),
+Q("According to rotation principles, a legume should be followed by a","Non-legume","Legume","Perennial tree only","Weed"),
+Q("Deep-rooted crops should be followed by","Shallow-rooted crops","Deep-rooted crops","Fallow forever","Trees"),
+Q("Exhaustive crops should be followed by","Restorative crops","Exhaustive crops","Weeds","Nothing"),
+Q("An advantage of crop rotation is","It suppresses weeds and controls pests and diseases","It requires no planning","It always lowers yield","It increases pest build-up"),
+Q("A disadvantage of crop rotation is","It requires planning","It reduces organic matter","It increases erosion","It spreads weeds"),
+Q("Growing two or more crops together on the same land at the same time is","Intercropping","Monocropping","Sequential cropping","Ratooning"),
+Q("The three classifications of intercropping are","Mixed, row (alley) and temporal","Pure, single and double","Annual, biennial and perennial","Relay, ratoon and trap"),
+Q("An advantage of intercropping is","Greater stability of yield over seasons","No competition between crops","Easy use of machines","It benefits large farmers most"),
+Q("Two or more crops grown in quick succession on the same land in one year is","Sequential cropping","Monocropping","Mixed cropping","Fallowing"),
+Q("Crops produced from the regrowth of the first crop is","Ratoon cropping","Relay cropping","Trap cropping","Mutualism"),
+Q("Which crop is commonly ratooned?","Sugarcane","Cowpea","Groundnut","Tomato"),
+Q("Planting a second crop before the first is harvested, so it continues after the first is harvested, is","Relay cropping","Ratoon cropping","Monocropping","Crop rotation"),
+Q("Planting a crop that is more attractive to a pest to protect the main crop is","Trap cropping","Relay cropping","Ratoon cropping","Mutualism"),
+Q("Perimeter trap cropping means","Trap crop completely surrounds the main crop","Trap crop in alternate rows","Trap crop in one corner","Trap crop after harvest"),
+Q("Mutualism in cropping refers to","Planting two crops close together so that they benefit each other","Planting one crop in a field","Burning crop residue","Using only chemicals"),
+// ---------- PESTS, DISEASES, WEEDS
+Q("A pest status is established when loss in yield reaches about","5–10%","0.1%","50%","90%"),
+Q("The lowest pest density that causes economic damage is the","Economic injury level","Economic threshold","Pest status","Carrying capacity"),
+Q("The pest density at which control should begin is the","Economic threshold","Economic injury level","Potential level","Critical age"),
+Q("Pests that perennially damage crops and rarely fall below the threshold are","Regular pests","Occasional pests","Potential pests","Beneficial pests"),
+Q("Locusts and armyworms are examples of","Occasional pests","Regular pests","Potential pests","Weeds"),
+Q("Quelea birds are pests of","Grain crops","Root crops","Cocoa pods","Rubber"),
+Q("Insects with mandibles that eat leaves are","Biting and chewing insects","Sucking insects","Boring insects only","Beneficial insects"),
+Q("Aphids damage crops by","Sucking sap and transmitting viruses","Chewing leaves","Boring stems","Eating roots"),
+Q("The cowpea weevil is an example of a","Boring insect","Sucking insect","Chewing caterpillar","Nematode"),
+Q("Root-knot disease of cowpea is caused by","Nematodes","Bacteria","Viruses","Aphids"),
+Q("Cassava mosaic and cocoa swollen shoot are transmitted by","Insect vectors","Wind only","Rodents","Birds"),
+Q("Ploughing and harrowing help control soil pests by","Exposing them to sunlight, desiccation and predators","Feeding them","Adding nitrogen","Increasing humidity"),
+Q("Stomach poisons are used against","Biting and chewing insects","Sucking insects","Weeds","Viruses"),
+Q("Contact insecticides are particularly useful against","Sucking insects","Rodents","Fungi","Weeds"),
+Q("Insecticides absorbed into the plant that poison feeding insects are","Systemic","Stomach","Contact","Fumigants"),
+Q("Fumigants are used mainly to control","Pests of stored products","Weeds in the field","Birds","Soil erosion"),
+Q("Antixenosis in host plant resistance means","Non-preference of the plant by the pest","Harmful effect on the pest","Tolerance to damage","Death of the plant"),
+Q("Antibiosis means the plant","Has harmful effects on the pest feeding on it","Is not preferred by the pest","Tolerates damage","Is a weed"),
+Q("Integrated pest management (IPM) aims at","Keeping pests below damaging levels","Complete eradication of all pests","Using only chemicals","Ignoring natural enemies"),
+Q("A phytosanitary certificate is part of","Regulatory (quarantine) pest control","Biological control","Chemical control","Cultural control"),
+Q("Most plant diseases are caused by","Fungi","Rodents","Birds","Weeds only"),
+Q("Parasites that can only live on living host tissue are","Obligate parasites","Facultative parasites","Saprophytes","Predators"),
+Q("Powdery mildews and rusts are","Obligate parasites","Facultative parasites","Saprophytes","Bacteria"),
+Q("Phytophthora palmivora causes","Black pod disease of cocoa","Potato blight","Damping-off","Cassava mosaic"),
+Q("Phytophthora infestans causes","Blight of potato and tomato","Black pod of cocoa","Rice blast","Root-knot"),
+Q("Damping-off of seedlings is commonly caused by","Pythium species","Puccinia species","Viruses","Insects"),
+Q("Downy mildews are caused by","Peronospora and Sclerospora","Puccinia","Pythium","Ustilago"),
+Q("Viruses are spread mainly by","Insect and nematode vectors","Wind-blown spores","Rain splash only","Seeds mostly"),
+Q("Tobacco mosaic and cassava mosaic are caused by","Viruses","Fungi","Bacteria","Nematodes"),
+Q("Most plant disease control measures are designed to","Prevent rather than cure","Cure after infection","Kill the host","Increase inoculum"),
+Q("Soaking seeds in hot water to kill loose smut is a","Physical method","Chemical method","Biological method","Regulatory method"),
+Q("Fungicides are used to control","Fungal diseases","Insects","Weeds","Rodents"),
+Q("A weed is","A plant growing where man does not want it","Any wild plant","Any poisonous plant","A plant with thorns"),
+Q("Weeds that complete their life cycle in one year are","Annual weeds","Biennial weeds","Perennial weeds","Noxious weeds"),
+Q("Quack grass and Johnson grass spread by underground stems and are","Perennial weeds","Annual weeds","Biennial weeds","Aquatic weeds"),
+Q("Weeds that are difficult to control because of extensive perennial roots are","Noxious weeds","Common weeds","Annual weeds","Beneficial weeds"),
+Q("Weed seed dormancy ensures that","Not all seeds germinate in the first favourable period","All seeds germinate at once","Seeds die quickly","Weeds do not spread"),
+Q("Striga hermonthica and Striga asiatica are","Parasitic weeds","Aquatic weeds","Beneficial weeds","Legumes"),
+Q("Barberry is the alternate host of","Wheat rust","Maize smut","Cassava mosaic","Cocoa black pod"),
+Q("Which is a beneficial effect of weeds?","Protect soil against erosion and recycle nutrients","Compete with crops for light","Harbour pests","Cause fire hazard"),
+Q("Imperata cylindrica (lalang) is a","Perennial grass weed","Annual broadleaf","Aquatic weed","Legume"),
+Q("Allelopathy is","Harmful chemical effect of one plant on another","Competition for light only","Control by insects","Control by fire"),
+Q("Chemicals used to kill or inhibit plant growth are","Herbicides","Fungicides","Insecticides","Rodenticides"),
+Q("Herbicide applied after planting but before the crop emerges is","Pre-emergence","Pre-plant","Post-emergence","Fumigant"),
+Q("Paraquat, diquat and glyphosate are examples of","Non-selective herbicides","Selective herbicides only","Insecticides","Fungicides"),
+Q("2,4-D is an example of a","Selective herbicide","Non-selective herbicide","Insecticide","Fumigant"),
+Q("Herbicides that are transported in xylem or phloem are","Systemic herbicides","Contact herbicides","Soil-acting herbicides only","Fumigants"),
+Q("Systemic herbicides are especially useful for controlling","Perennial weeds","Seedlings only","Aquatic weeds only","Fungi"),
+Q("Perennial weeds should be attacked","At the start of the rains when food reserves are lowest","At the end of the rains","After they seed","In the dry season only"),
+Q("The weed management approach that uses all available knowledge to keep weeds below economic loss is","Integrated weed management","Weed eradication","Weed prevention only","Chemical weed control only"),
+Q("Complete removal of all weeds and their propagules from a habitat is","Weed eradication","Weed control","Weed management","Weed prevention"),
+Q("Live mulch with Centrosema pubescens or Mucuna pruriens helps by","Smothering weeds and preventing erosion","Increasing weeds","Spreading pests","Reducing soil organic matter"),
+// ---------- HARVESTING, STORAGE, PROCESSING
+Q("Harvesting is done when a crop reaches","Physiological maturity","Germination","Seedling stage","Flowering only"),
+Q("The portion of stem left in the field after harvest is","Stubble","Straw","Chaff","Husk"),
+Q("The main factor determining time of harvest is","Maturity of the crop","Price of fertilizer","Colour of soil","Size of the farm"),
+Q("Produce to be stored for some time should be harvested at","A mature but unripe stage","An overripe stage","An immature stage","Any stage"),
+Q("Machines used to cut grain crops and separate the grain at the same time are","Combines","Mowers","Ploughs","Harrows"),
+Q("Fruits like banana, citrus and pepper must be cut from the plant because they","Have no abscission zone","Have an abscission zone","Are underground","Are too small"),
+Q("Storage losses in developing countries can reach up to ___ for grains","30%","3%","0.5%","90%"),
+Q("Storage losses in developing countries can reach up to ___ for roots and tubers","50%","5%","1%","90%"),
+Q("Before storage, grains are dried because moisture","Encourages growth of micro-organisms","Preserves the grain","Kills pests","Improves viability"),
+Q("Fruits and vegetables are best stored in cold storage at about","0–4°C","20–25°C","30–40°C","−20°C"),
+Q("Ripe bananas and apples are high producers of","Ethylene","Oxygen","Nitrogen","Methane only"),
+Q("Separating grain from the stalk and chaff by hitting is","Threshing","Winnowing","Shelling","Curing"),
+Q("Separating lighter and heavier components using wind is","Winnowing","Threshing","Shelling","Precooling"),
+Q("Removing maize kernels from the cob is","Shelling","Winnowing","Threshing only","Curing"),
+Q("Wound healing in root and tuber crops after harvest is","Curing","Precooling","Grading","Sorting"),
+Q("Curing of tropical roots is best at about","30–40°C and above 85% relative humidity","5°C and 50% humidity","60°C and 10% humidity","0°C and 100% humidity"),
+Q("Roots and tubers should not be washed before curing because washing","Increases decay","Prevents rot","Speeds curing","Kills pests"),
+Q("Removing field heat quickly after harvest is","Precooling","Curing","Winnowing","Shelling"),
+Q("Removing rotten or damaged fruits from healthy ones is","Sorting","Grading","Packaging","Curing"),
+Q("Categorising produce by size, colour or ripeness is","Grading","Sorting","Threshing","Winnowing"),
+Q("Cleaning raw materials of foreign matter and grading is","Primary food processing","Secondary food processing","Tertiary food processing","Curing"),
+Q("Converting secondary processed material into ready-to-eat form is","Tertiary processing","Primary processing","Curing","Precooling"),
+// ---------- LIVESTOCK SYSTEMS AND POULTRY
+Q("Nomadic people with large migratory herds grazing communal land practise","Pastoralism","Ranching","Intensive farming","Battery farming"),
+Q("Which is a characteristic of the extensive system of livestock production?","Few or no purchased inputs","High automation","Total confinement","Year-round products"),
+Q("Which is a characteristic of the intensive system?","Animals are confined and fed above maintenance","Animals scavenge freely","No purchased inputs","Survival is emphasised"),
+Q("Ranching involves","Large herds of cattle or sheep with minimal labour","Total confinement of birds","Nomadic movement over any land","Keeping pets"),
+Q("Subsistence livestock farming aims mainly at","Feeding the family","Export","Maximum profit","Research"),
+Q("The system between purely extensive and totally intensive is","Transitional (intermediate)","Pastoral","Battery","Subsistence"),
+Q("Feed constitutes about ___ of the total cost of poultry production","60–80%","5–10%","20%","100%"),
+Q("Mortality rate in poultry is calculated as","(Number dead ÷ number started) × 100","(Number started ÷ number dead) × 100","Number dead + number started","Number started − 100"),
+Q("Mortality of layers during the laying period should be less than","4%","20%","30%","50%"),
+Q("Mortality of pullets from day-old to point of lay should not exceed","5–6%","30%","50%","1%"),
+Q("Hen-day egg production is based on","Birds alive and laying","Birds housed at the start","Total eggs ever laid","Feed consumed"),
+Q("Hen-housed production is based on","Hens housed at the beginning of lay","Hens alive only","Eggs sold","Chicks hatched"),
+Q("Feed efficiency in broilers is","Weight gain ÷ feed intake","Feed intake ÷ weight gain","Feed + weight","Weight × feed"),
+Q("A desirable feed conversion goal for commercial broilers is about","2.0","10","0.1","5.0"),
+Q("A castrated male chicken is a","Capon","Cockerel","Pullet","Broiler"),
+Q("An immature female chicken is a","Pullet","Cockerel","Capon","Drake"),
+Q("A young male turkey is a","Jake","Gander","Keet","Drake"),
+Q("A baby guinea fowl is a","Keet","Poult","Gosling","Duckling"),
+Q("A hen sitting on eggs to hatch them is","Broody","Culled","Dressed","Feral"),
+Q("Removing a bird from the flock because of poor productivity is","Culling","Brooding","Dressing","Debeaking"),
+Q("Brooding is","Caring for young chicks after hatching","Laying of eggs","Removing the beak","Killing of birds"),
+Q("The brooding period is about","0–6 weeks","10–20 weeks","20–30 weeks","1 year"),
+Q("The most important requirement of day-old chicks is","Warmth","Perfume","Sunlight outdoors","Hard floor"),
+Q("A material that should NOT be used as litter for chicks because they eat it is","Sawdust","Wood shavings","Chopped maize cobs","Rice husks"),
+Q("The recommended depth of litter in a brooder house is about","7.5 cm (3 inches)","50 cm","1 cm","20 cm"),
+Q("Chicks huddled in the centre close to the heat source indicate they are","Too cold","Too hot","Comfortable","Dead"),
+Q("Chicks pushing against the chick guard away from the heat indicate they are","Too hot","Too cold","Comfortable","Hungry"),
+Q("Day-old chicks should be ordered about ___ before collection","2–3 months","1 day","1 hour","2 years"),
+Q("Debeaking in birds is done to reduce","Feather and vent pecking and cannibalism","Egg size","Body weight","Feeding"),
+Q("The best method of debeaking is","Electric debeaker","Cold scissors","Knife","Hammer"),
+Q("The 'all-in, all-out' system means","All birds enter and leave the house together","Birds are moved daily","Only layers are kept","Birds roam freely"),
+Q("Broiler starter feed is fed for the first","1–5 weeks","20 weeks","30 weeks","1 week only"),
+Q("Broiler starter feed has about ___ protein","23%","5%","40%","60%"),
+Q("Broilers are usually ready for market at about","8 weeks","1 year","6 months","3 weeks"),
+Q("Pullets are expected to start laying at about","20–24 weeks","4 weeks","10 weeks","40 weeks"),
+Q("Good layers should attain 50% hen-day production by about","26 weeks","6 weeks","10 weeks","60 weeks"),
+Q("Layers need calcium in feed (up to 3.5%) mainly for","Shell formation","Feather colour","Beak growth","Water intake"),
+Q("The 'skip-a-day' feed restriction method means","Full feed for two days then no feed for one day","Feeding only once a week","Feeding at night only","Stopping feed forever"),
+Q("The poultry disease spread by feather dander that causes paralysis and tumours is","Marek's disease","Fowl pox","Coryza","Coccidiosis"),
+Q("Twisted neck, paralysis and respiratory signs in chickens indicate","Newcastle disease","Fowl pox","Pullorum","Mites"),
+Q("Warty bumps on the legs and mouth lesions indicate","Fowl pox","Newcastle disease","Marek's disease","Fowl cholera"),
+Q("Swollen head with eyes swelling shut is typical of","Infectious coryza","Fowl pox","Gumboro","Coccidiosis"),
+Q("Coccidiosis in young birds is caused by","Internal parasites (protozoa)","Viruses","Rodents","Poor lighting"),
+Q("Marek's disease vaccine is given at","Day 1 by subcutaneous injection at the back of the neck","Week 20 in drinking water","Week 8 by wing web","Day 28 by eye drop"),
+Q("Gumboro (IBD) vaccine is given at","Day 14 and Day 28 in drinking water","Day 1 by injection","Week 8 by wing web","Week 20 by eye drop"),
+Q("Fowl pox vaccine is given by","Wing web jab at week 8","Drinking water at day 1","Eye drop at day 14","Feed at week 4"),
+Q("Which practice helps prevent disease in a poultry farm?","Using a footbath at the entrance","Mixing birds from different farms","Allowing visitors freely","Leaving dead birds in the pen"),
+Q("Records in a poultry farm that list equipment, drugs and feeds are","Inventory records","Sales records","Production records","Health records only"),
+Q("Advantage of poultry farming includes","Short generation interval and rapid return on capital","Needing very large land","Very slow turnover","High start-up capital"),
+];
+ 
+</script>
+<script>
+const TOTAL=70, MINUTES=25, PASS=50, KEY='cbt_session_v1';
+const $=id=>document.getElementById(id);
+let S=null, cur=0, tick=null;
+ 
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function show(id){['login','exam','result'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('timer').classList.toggle('hidden',id!=='exam')}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ 
+function start(){
+  const name=$('name').value.trim().replace(/\s+/g,' '), reg=$('reg').value.trim();
+  if(name.split(' ').length<2||name.length<5){return $('lerr').textContent='Please enter your full name (at least two names).'}
+  if(!/^[\w\/\-\s]{6,20}$/.test(reg)||!/\d/.test(reg)){return $('lerr').textContent='Please enter a valid registration number.'}
+  const n=Math.min(TOTAL,QUESTIONS.length);
+  const ids=shuffle(QUESTIONS.map((_,i)=>i)).slice(0,n);
+  // each question's options are shuffled once per student
+  const order={};ids.forEach(i=>order[i]=shuffle([0,1,2,3]));
+  S={name,reg,ids,order,ans:{},flags:{},end:Date.now()+MINUTES*60000,done:false};
+  save();begin();
+}
+function begin(){
+  $('who').textContent=S.name+' | '+S.reg;
+  show('exam');cur=0;render();clearInterval(tick);tick=setInterval(clock,500);clock();
+}
+function clock(){
+  const left=Math.max(0,S.end-Date.now());
+  const m=Math.floor(left/60000),s=Math.floor(left%60000/1000);
+  $('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  $('timer').classList.toggle('low',left<=5*60000);
+  if(left<=0){finish(true)}
+}
+function render(){
+  const qi=S.ids[cur],q=QUESTIONS[qi],ord=S.order[qi];
+  $('qno').textContent='Question '+(cur+1)+' of '+S.ids.length;
+  $('qtext').textContent=q.q;
+  $('opts').innerHTML=ord.map((oi,k)=>`<button class="opt ${S.ans[qi]===oi?'sel':''}" data-o="${oi}"><b>${'ABCD'[k]}.</b><span>${esc(q.o[oi])}</span></button>`).join('');
+  $('opts').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{S.ans[qi]=+b.dataset.o;save();render()});
+  $('prev').disabled=cur===0;$('next').disabled=cur===S.ids.length-1;
+  $('flag').textContent=S.flags[qi]?'Unflag':'Flag';
+  const answered=S.ids.filter(i=>S.ans[i]!==undefined).length;
+  $('prog').textContent=' ('+answered+'/'+S.ids.length+' answered)';
+  $('grid').innerHTML=S.ids.map((i,k)=>`<button data-k="${k}" class="${S.ans[i]!==undefined?'ans':''} ${S.flags[i]?'flag':''} ${k===cur?'cur':''}">${k+1}</button>`).join('');
+  $('grid').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=+b.dataset.k;render();window.scrollTo(0,0)});
+}
+function askSubmit(){
+  const un=S.ids.filter(i=>S.ans[i]===undefined).length;
+  $('cmsg').textContent=un?('You have '+un+' unanswered question(s). Submit anyway?'):'You have answered all questions. Submit now?';
+  $('confirm').classList.remove('hidden');
+}
+function finish(auto){
+  clearInterval(tick);$('confirm').classList.add('hidden');
+  if(!S.done){S.done=true;S.submittedAt=Date.now();S.auto=!!auto;save()}
+  result();
+}
+function result(){
+  $('who').textContent=S.name+' | '+S.reg;
+  let score=0,wrong=[];
+  S.ids.forEach((qi,k)=>{ if(S.ans[qi]===0)score++; else wrong.push([k,qi]) });
+  const n=S.ids.length,pct=Math.round(score/n*100),ok=pct>=PASS;
+  $('rname').textContent=S.name;$('rreg').textContent=S.reg;
+  $('rscore').textContent=score+' / '+n;$('rscore').classList.toggle('fail',!ok);
+  $('rpct').textContent=pct+'%';
+  $('rpill').textContent=ok?'PASS':'FAIL';$('rpill').classList.toggle('fail',!ok);
+  const un=S.ids.filter(i=>S.ans[i]===undefined).length;
+  $('rmeta').textContent='Correct: '+score+'  |  Wrong: '+(wrong.length-un)+'  |  Unanswered: '+un+(S.auto?'  |  Time was up, exam auto-submitted':'');
+  $('review').innerHTML=wrong.length?wrong.map(([k,qi])=>{const q=QUESTIONS[qi],a=S.ans[qi];
+    return `<div class="rev"><div><b>Q${k+1}.</b> ${esc(q.q)}</div><div class="y">Your answer: ${a===undefined?'Not answered':esc(q.o[a])}</div><div class="c">Correct answer: ${esc(q.o[0])}</div></div>`}).join(''):'<p>Perfect score. You did not miss any question.</p>';
+  show('result');window.scrollTo(0,0);
+}
+$('start').onclick=start;
+$('reg').addEventListener('keydown',e=>{if(e.key==='Enter')start()});
+$('prev').onclick=()=>{cur--;render()};$('next').onclick=()=>{cur++;render()};
+$('flag').onclick=()=>{const qi=S.ids[cur];S.flags[qi]=!S.flags[qi];save();render()};
+$('submit').onclick=askSubmit;$('cno').onclick=()=>$('confirm').classList.add('hidden');$('cyes').onclick=()=>finish(false);
+$('logout').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}S=null;$('name').value='';$('reg').value='';$('who').textContent='Computer Based Test (CBT) | CSC 222: Principles of Crop Production';show('login')};
+window.addEventListener('beforeunload',e=>{if(S&&!S.done){e.preventDefault();e.returnValue=''}});
+(function init(){
+  S=load();
+  if(S&&Array.isArray(S.ids)){ if(S.done||Date.now()>=S.end){ if(!S.done){S.done=true;S.auto=true;save()} result() } else begin(); }
+  else show('login');
+})();
+</script>
+</body>
+</html>
+ 
